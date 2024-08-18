@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mal.Net</RootNamespace>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>Mal.Net</PackageId>
+    <Title>MyAnimeList API</Title>
+    <Authors>Arikatsu</Authors>
+    <Company>Seikimo-Inc</Company>
+    <Product>Mal.Net</Product>
+    <Description>A comprehensive .NET library providing full coverage of the MyAnimeList API. This package offers a complete and intuitive interface for accessing all features of the MyAnimeList API, enabling seamless integration into your .NET applications.</Description>
+    <Copyright>Arikatsu</Copyright>
+    <RepositoryUrl>https://github.com/Arikatsu/Mal.Net</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>
