@@ -65,13 +65,9 @@ public class MalClient : IDisposable, IAnimeService
             .AddParamIf("q", query)
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
-        var response = await _httpClient.GetAsync(url.GetUrl());
-        var data = JsonSerializer.Deserialize<Paginated<AnimeList>>(response);
-        
-        if (data == null)
-        {
-            throw new JsonException("Failed to deserialize JSON response.");
-        }
+        var error = "Failed to retrieve anime list" + (query != null ? $" for query '{query}'" : string.Empty);
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = Paginated<AnimeList>.FromJson(response);
         
         return data;
     }

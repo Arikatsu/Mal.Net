@@ -1,4 +1,7 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using Mal.Net.Schemas;
+using Mal.Net.Exceptions;
 
 namespace Mal.Net.Utils;
 
@@ -12,7 +15,7 @@ internal class MalHttpClient : IDisposable
         _clientId = clientId;
     }
 
-    public async Task<string> GetAsync(string url, string? token = null)
+    public async Task<string> GetAsync(string url, string? exceptionMessage = null, string? token = null)
     {
         _httpClient.DefaultRequestHeaders.Clear();
 
@@ -25,10 +28,22 @@ internal class MalHttpClient : IDisposable
             _httpClient.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", _clientId);
         }
 
-        var response = await _httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode();
+        HttpResponseMessage response;
 
-        return await response.Content.ReadAsStringAsync();
+        try
+        {
+            response = await _httpClient.GetAsync(url);
+        }
+        catch (HttpRequestException e)
+        {
+            throw new MalHttpException(HttpStatusCode.ServiceUnavailable, exceptionMessage, innerException: e);
+        }
+
+        if (response.IsSuccessStatusCode) return await response.Content.ReadAsStringAsync();
+
+        var errorResponse = await response.Content.ReadAsStringAsync();
+        throw new MalHttpException(response.StatusCode, exceptionMessage,
+            malErrorResponse: MalErrorResponse.FromJson(errorResponse));
     }
 
     public async Task<string> PostAsync(string url, HttpContent content, string? token = null)
