@@ -1,9 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Mal.Net.Schemas.Anime;
 
 public class AnimeNode
 {
+    #region Json Properties
+    
     [JsonPropertyName(AnimeFields.Id)]
     public int? Id { get; set; }
     
@@ -81,4 +84,11 @@ public class AnimeNode
     
     [JsonPropertyName(AnimeFields.Studios)]
     public IEnumerable<Studio>? Studios { get; set; }
+    
+    #endregion
+    
+    public static AnimeNode FromJson(string json)
+    {
+        return JsonSerializer.Deserialize<AnimeNode>(json) ?? throw new JsonException("Failed to deserialize JSON response.");
+    }
 }
