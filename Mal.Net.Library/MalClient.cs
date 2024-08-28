@@ -75,13 +75,16 @@ public class MalClient : IDisposable, IAnimeService
     /// <inheritdoc/>
     /// <param name="animeId">The ID of the anime to retrieve details for.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<JsonDocument> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields = null)
+    public async Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields = null)
     {
         var url = new ApiUrl($"anime/{animeId}")
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
-        var response = await _httpClient.GetAsync(url.GetUrl());
-        return JsonDocument.Parse(response);
+        var error = $"Failed to retrieve anime details for ID '{animeId}'";
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = AnimeNode.FromJson(response);
+        
+        return data;
     }
 
     

@@ -23,5 +23,5 @@ public interface IAnimeService
     /// <returns>
     /// A task representing the asynchronous operation. The task result contains the JSON response from the API.
     /// </returns>
-    Task<JsonDocument> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields);
+    Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields);
 }
