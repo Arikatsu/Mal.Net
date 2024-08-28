@@ -97,3 +97,12 @@ public class Studio
     [JsonPropertyName("name")]
     public string? Name { get; set; }
 }
+
+public class Ranking
+{
+    [JsonPropertyName("rank")]
+    public int? Rank { get; set; }
+    
+    [JsonPropertyName("previous_rank")]
+    public int? PreviousRank { get; set; }
+}

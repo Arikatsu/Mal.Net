@@ -6,6 +6,7 @@ namespace Mal.Net.Testing;
 
 public class MalClientTests
 {
+    private readonly JsonSerializerOptions _options = new() { WriteIndented = true };
     private readonly ITestOutputHelper _output;
     private readonly MalClient _client;
 
@@ -30,7 +31,7 @@ public class MalClientTests
 
         var animeList = await _client.GetAnimeListAsync("oregairu", 1, 1, fields);
 
-        var json = JsonSerializer.Serialize(animeList, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(animeList, _options);
         _output.WriteLine(json);
 
         Assert.NotNull(animeList);
@@ -43,9 +44,32 @@ public class MalClientTests
 
         var animeDetails = await _client.GetAnimeDetailsAsync(33161, fields);
 
-        var json = JsonSerializer.Serialize(animeDetails, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(animeDetails, _options);
         _output.WriteLine(json);
 
         Assert.NotNull(animeDetails);
+    }
+    
+    [Fact]
+    public async Task AnimeRankingTest()
+    {
+
+        var animeRanking = await _client.GetAnimeRankingAsync("airing", 10);
+
+        var json = JsonSerializer.Serialize(animeRanking, _options);
+        _output.WriteLine(json);
+
+        Assert.NotNull(animeRanking);
+    }
+    
+    [Fact]
+    public async Task AnimeSeasonTest()
+    {
+        var animeSeason = await _client.GetAnimeSeasonAsync(2024, "summer", "anime_score", 10);
+
+        var json = JsonSerializer.Serialize(animeSeason, _options);
+        _output.WriteLine(json);
+
+        Assert.NotNull(animeSeason);
     }
 }

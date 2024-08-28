@@ -3,6 +3,9 @@ using Mal.Net.Schemas;
 
 namespace Mal.Net.Exceptions;
 
+/// <summary>
+/// Represents an exception thrown when an HTTP error occurs when interacting with the MyAnimeList API.
+/// </summary>
 public class MalHttpException : MalClientException
 {
     public HttpStatusCode StatusCode { get; }
@@ -30,9 +33,16 @@ public class MalHttpException : MalClientException
 
         if (errorResponse == null) return errorMessage;
 
-        var message = string.IsNullOrEmpty(errorResponse.Message)
-            ? "Could not find requested resource"
-            : errorResponse.Message;
+        var message = !string.IsNullOrEmpty(errorResponse.Message)
+            ? errorResponse.Message
+            : statusCode switch
+            {
+                HttpStatusCode.NotFound => "Resource not found",
+                HttpStatusCode.BadRequest => "Invalid parameters provided",
+                HttpStatusCode.Forbidden => "Forbidden access",
+                _ => "An error occurred"
+            };
+            
         errorMessage += $" - {message} (Status Code: {(int)statusCode})";
 
         return errorMessage;
