@@ -15,7 +15,7 @@ internal class MalHttpClient : IDisposable
         _clientId = clientId;
     }
 
-    public async Task<string> GetAsync(string url, string? exceptionMessage = null, string? token = null)
+    internal async Task<string> GetAsync(string url, string? exceptionMessage = null, string? token = null)
     {
         _httpClient.DefaultRequestHeaders.Clear();
 
@@ -46,7 +46,7 @@ internal class MalHttpClient : IDisposable
             malErrorResponse: MalErrorResponse.FromJson(errorResponse));
     }
 
-    public async Task<string> PostAsync(string url, HttpContent content, string? token = null)
+    internal async Task<string> PostAsync(string url, HttpContent content, string? token = null)
     {
         _httpClient.DefaultRequestHeaders.Clear();
 
