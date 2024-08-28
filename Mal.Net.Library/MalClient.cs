@@ -61,7 +61,7 @@ public class MalClient : IDisposable, IAnimeService
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
     public async Task<Paginated<AnimeList>> GetAnimeListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
     {
-        var url = new ApIUrl("anime", new { limit, offset })
+        var url = new ApiUrl("anime", new { limit, offset })
             .AddParamIf("q", query)
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
@@ -81,7 +81,7 @@ public class MalClient : IDisposable, IAnimeService
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
     public async Task<JsonDocument> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields = null)
     {
-        var url = new ApIUrl($"anime/{animeId}")
+        var url = new ApiUrl($"anime/{animeId}")
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
         var response = await _httpClient.GetAsync(url.GetUrl());

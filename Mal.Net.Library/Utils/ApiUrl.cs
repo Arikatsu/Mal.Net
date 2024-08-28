@@ -1,19 +1,19 @@
 ﻿namespace Mal.Net.Utils;
 
-internal class ApIUrl
+internal class ApiUrl
 {
     private const string Endpoint = "https://api.myanimelist.net/v2";
     
     private readonly string _path;
     private readonly List<string> _params;
 
-    internal ApIUrl(string path)
+    internal ApiUrl(string path)
     {
         _path = path;
         _params = new List<string>();
     }
     
-    internal ApIUrl(string path, object parameters)
+    internal ApiUrl(string path, object parameters)
     {
         _path = path;
         _params = parameters.GetType()
@@ -34,13 +34,13 @@ internal class ApIUrl
         return $"{Endpoint}/{_path}";
     }
 
-    internal ApIUrl AddParam(string key, string value)
+    internal ApiUrl AddParam(string key, string value)
     {
         _params.Add($"{key}={value}");
         return this;
     }
     
-    internal ApIUrl AddParamIf(string key, string? value, bool condition = true)
+    internal ApiUrl AddParamIf(string key, string? value, bool condition = true)
     {
         if (condition && !string.IsNullOrEmpty(value))
         {
