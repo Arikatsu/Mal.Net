@@ -48,4 +48,13 @@ internal class ApiUrl
         }
         return this;
     }
+    
+    internal ApiUrl AddParamIf(string key, int? value, bool condition = true)
+    {
+        if (condition && !value.HasValue)
+        {
+            _params.Add($"{key}={value}");
+        }
+        return this;
+    }
 }
