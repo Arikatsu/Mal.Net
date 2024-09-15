@@ -13,7 +13,7 @@ public class MalHttpException : MalClientException
     public string? AdditionalInfo { get; }
 
     public MalHttpException(HttpStatusCode statusCode, string? additionalInfo,
-        MalErrorResponse? malErrorResponse = null, Exception? innerException = null)
+        MalErrorResponse? malErrorResponse = null)
         : base(FormatErrorMessage(statusCode, additionalInfo, malErrorResponse))
     {
         StatusCode = statusCode;

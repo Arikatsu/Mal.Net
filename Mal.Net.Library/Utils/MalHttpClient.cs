@@ -28,23 +28,24 @@ internal class MalHttpClient : IDisposable
             _httpClient.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", _clientId);
         }
 
-        HttpResponseMessage response;
-
         try
         {
-            response = await _httpClient.GetAsync(url);
+            using var response = await _httpClient.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            throw new MalHttpException(response.StatusCode, exceptionMessage, malErrorResponse: MalErrorResponse.FromJson(errorResponse));
         }
         catch (HttpRequestException e)
         {
-            throw new MalHttpException(HttpStatusCode.ServiceUnavailable, exceptionMessage, innerException: e);
+            throw new MalHttpException(HttpStatusCode.ServiceUnavailable, $"Service unavailable: {e.Message}");
         }
-
-        if (response.IsSuccessStatusCode) return await response.Content.ReadAsStringAsync();
-
-        var errorResponse = await response.Content.ReadAsStringAsync();
-        throw new MalHttpException(response.StatusCode, exceptionMessage,
-            malErrorResponse: MalErrorResponse.FromJson(errorResponse));
     }
+
 
     internal async Task<string> PostAsync(string url, HttpContent content, string? token = null)
     {
