@@ -38,5 +38,5 @@ public interface IForumService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId, int? subboardId, string query, string topicUserName, string userName, int limit, int offset);
+    Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId, int? subBoardId, string query, string topicUserName, string userName, int limit, int offset);
 }

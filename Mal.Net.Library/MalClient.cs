@@ -161,22 +161,24 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     
     /// <inheritdoc/>
     /// <param name="boardId">The ID of the board to retrieve topics for. Default is null.</param>
-    /// <param name="subboardId">The ID of the sub-board to retrieve topics for. Default is null.</param>
+    /// <param name="subBoardId">The ID of the sub-board to retrieve topics for. Default is null.</param>
     /// <param name="query">The search query to filter topics. Default is null.</param>
     /// <param name="topicUserName">The username of the topic creator. Default is null.</param>
     /// <param name="userName">The username of the topic poster. Default is null.</param>
-    public async Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId = null, int? subboardId = null, string? query = null, string? topicUserName = null, string? userName = null, int limit = 100, int offset = 0)
+    /// <param name="limit">The maximum number of results to return. Default is 100.</param>
+    /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
+    public async Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId = null, int? subBoardId = null, string? query = null, string? topicUserName = null, string? userName = null, int limit = 100, int offset = 0)
     {
         var url = new ApiUrl("forum/topics", new { limit, offset })
             .AddParamIf("board_id", boardId)
-            .AddParamIf("subboard_id", subboardId)
+            .AddParamIf("subboard_id", subBoardId)
             .AddParamIf("q", query)
             .AddParamIf("topic_user_name", topicUserName)
             .AddParamIf("user_name", userName);
         
         var error = "Failed to retrieve forum topics for"
             + (boardId != null ? $" board ID '{boardId}'." : string.Empty)
-            + (subboardId != null ? $" subboard ID '{subboardId}'." : string.Empty)
+            + (subBoardId != null ? $" sub-board ID '{subBoardId}'." : string.Empty)
             + (query != null ? $" query '{query}'." : string.Empty)
             + (topicUserName != null ? $" topic user name '{topicUserName}'." : string.Empty)
             + (userName != null ? $" user name '{userName}'." : string.Empty);

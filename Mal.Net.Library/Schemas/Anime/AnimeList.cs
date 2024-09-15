@@ -5,7 +5,7 @@ namespace Mal.Net.Schemas.Anime;
 
 public class AnimeList
 {
-    # region Json Properties
+    #region Json Properties
     
     [JsonPropertyName("node")]
     public AnimeNode? Node { get; set; }
