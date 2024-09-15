@@ -1,15 +1,15 @@
-﻿using System.Text.Json;
-using Mal.Net.Services;
+﻿using Mal.Net.Services;
 using Mal.Net.Utils;
 using Mal.Net.Schemas;
 using Mal.Net.Schemas.Anime;
+using Mal.Net.Schemas.Forum;
 
 namespace Mal.Net;
 
 /// <summary>
 /// Represents the main entry point for interacting with the MyAnimeList API.
 /// </summary>
-public class MalClient : IDisposable, IAnimeService
+public class MalClient : IDisposable, IAnimeService, IForumService
 {
     private readonly MalHttpClient _httpClient;
 
@@ -125,5 +125,67 @@ public class MalClient : IDisposable, IAnimeService
     }
 
 
+    #endregion
+    
+    
+    #region Forum API Calls
+    
+    
+    /// <inheritdoc/>
+    public async Task<Forums> GetForumBoardsAsync()
+    {
+        var url = new ApiUrl("forum/boards");
+        
+        const string error = "Failed to retrieve forum boards";
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = Forums.FromJson(response);
+        
+        return data;
+    }
+    
+    /// <inheritdoc/>
+    /// <param name="topicId">The ID of the topic to retrieve details for.</param>
+    /// <param name="limit">The maximum number of results to return. Default is 100.</param>
+    /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
+    public async Task<Paginated<ForumTopicDetail>> GetForumTopicsDetailAsync(int topicId, int limit = 100, int offset = 0)
+    {
+        var url = new ApiUrl($"forum/topic/{topicId}", new { limit, offset });
+        
+        var error = $"Failed to retrieve forum topics for ID '{topicId}'";
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = Paginated<ForumTopicDetail>.FromJson(response);
+        
+        return data;
+    }
+    
+    /// <inheritdoc/>
+    /// <param name="boardId">The ID of the board to retrieve topics for. Default is null.</param>
+    /// <param name="subboardId">The ID of the sub-board to retrieve topics for. Default is null.</param>
+    /// <param name="query">The search query to filter topics. Default is null.</param>
+    /// <param name="topicUserName">The username of the topic creator. Default is null.</param>
+    /// <param name="userName">The username of the topic poster. Default is null.</param>
+    public async Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId = null, int? subboardId = null, string? query = null, string? topicUserName = null, string? userName = null, int limit = 100, int offset = 0)
+    {
+        var url = new ApiUrl("forum/topics", new { limit, offset })
+            .AddParamIf("board_id", boardId)
+            .AddParamIf("subboard_id", subboardId)
+            .AddParamIf("q", query)
+            .AddParamIf("topic_user_name", topicUserName)
+            .AddParamIf("user_name", userName);
+        
+        var error = "Failed to retrieve forum topics for"
+            + (boardId != null ? $" board ID '{boardId}'." : string.Empty)
+            + (subboardId != null ? $" subboard ID '{subboardId}'." : string.Empty)
+            + (query != null ? $" query '{query}'." : string.Empty)
+            + (topicUserName != null ? $" topic user name '{topicUserName}'." : string.Empty)
+            + (userName != null ? $" user name '{userName}'." : string.Empty);
+        
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = Paginated<ForumTopic>.FromJson(response);
+        
+        return data;
+    }
+    
+    
     #endregion
 }
