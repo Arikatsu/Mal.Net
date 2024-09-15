@@ -3,13 +3,14 @@ using Mal.Net.Utils;
 using Mal.Net.Schemas;
 using Mal.Net.Schemas.Anime;
 using Mal.Net.Schemas.Forum;
+using Mal.Net.Schemas.Manga;
 
 namespace Mal.Net;
 
 /// <summary>
 /// Represents the main entry point for interacting with the MyAnimeList API.
 /// </summary>
-public class MalClient : IDisposable, IAnimeService, IForumService
+public class MalClient : IDisposable, IAnimeService, IForumService, IMangaService
 {
     private readonly MalHttpClient _httpClient;
 
@@ -182,6 +183,63 @@ public class MalClient : IDisposable, IAnimeService, IForumService
         
         var response = await _httpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<ForumTopic>.FromJson(response);
+        
+        return data;
+    }
+    
+    
+    #endregion
+    
+    
+    #region Manga API Calls
+    
+    
+    /// <inheritdoc/>
+    /// <param name="query">The search query to filter manga.</param>
+    /// <param name="limit">The maximum number of results to return. Default is 100.</param>
+    /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
+    /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
+    public async Task<Paginated<MangaList>> GetMangaListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
+    {
+        var url = new ApiUrl("manga", new { limit, offset })
+            .AddParamIf("q", query)
+            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
+        
+        var error = "Failed to retrieve manga list" + (query != null ? $" for query '{query}'" : string.Empty);
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = Paginated<MangaList>.FromJson(response);
+        
+        return data;
+    }
+    
+    /// <inheritdoc/>
+    /// <param name="mangaId">The ID of the manga to retrieve details for.</param>
+    /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
+    public async Task<MangaNode> GetMangaDetailsAsync(int mangaId, IEnumerable<string>? fields = null)
+    {
+        var url = new ApiUrl($"manga/{mangaId}")
+            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
+        
+        var error = $"Failed to retrieve manga details for ID '{mangaId}'";
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = MangaNode.FromJson(response);
+        
+        return data;
+    }
+    
+    /// <inheritdoc/>
+    /// <param name="rankingType">The type of ranking to retrieve. Valid types include "all", "manga", "novels", "oneshots", "doujin", "manhwa", "manhua", "bypopularity", "favorite".</param>
+    /// <param name="limit">The maximum number of results to return. Default is 100.</param>
+    /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
+    /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
+    public async Task<Paginated<RankedMangaList>> GetMangaRankingAsync(string rankingType, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
+    {
+        var url = new ApiUrl("manga/ranking", new { ranking_type = rankingType, limit, offset })
+            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
+        
+        var error = $"Failed to retrieve manga ranking for type '{rankingType}'";
+        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var data = Paginated<RankedMangaList>.FromJson(response);
         
         return data;
     }

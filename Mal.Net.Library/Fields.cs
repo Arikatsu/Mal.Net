@@ -41,12 +41,17 @@ public static class MyListStatusFields
     public const string Status = "status";
     public const string Score = "score";
     public const string NumEpisodesWatched = "num_episodes_watched";
+    public const string NumVolumesRead = "num_volumes_read";
+    public const string NumChaptersRead = "num_chapters_read";
     public const string IsReWatching = "is_rewatching";
+    public const string IsRereading = "is_rereading";
     public const string StartDate = "start_date";
     public const string FinishDate = "finish_date";
     public const string Priority = "priority";
     public const string NumTimesReWatched = "num_times_rewatched";
+    public const string NumTimesReread = "num_times_reread";
     public const string ReWatchValue = "rewatch_value";
+    public const string RereadValue = "reread_value";
     public const string Tags = "tags";
     public const string Comments = "comments";
     public const string UpdatedAt = "updated_at";
