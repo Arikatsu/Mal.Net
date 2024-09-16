@@ -5,32 +5,27 @@ using Mal.Net.Exceptions;
 
 namespace Mal.Net.Utils;
 
-internal class MalHttpClient : IDisposable
+internal static class MalHttpClient
 {
-    private readonly HttpClient _httpClient = new();
-    private readonly string _clientId;
+    private static readonly HttpClient HttpClient = new();
+    internal static string ClientId { get; set; } = string.Empty;
 
-    internal MalHttpClient(string clientId)
+    internal static async Task<string> GetAsync(string url, string? exceptionMessage = null, string? token = null)
     {
-        _clientId = clientId;
-    }
-
-    internal async Task<string> GetAsync(string url, string? exceptionMessage = null, string? token = null)
-    {
-        _httpClient.DefaultRequestHeaders.Clear();
+        HttpClient.DefaultRequestHeaders.Clear();
 
         if (!string.IsNullOrEmpty(token))
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
         else
         {
-            _httpClient.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", _clientId);
+            HttpClient.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", ClientId);
         }
 
         try
         {
-            using var response = await _httpClient.GetAsync(url);
+            using var response = await HttpClient.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
             {
@@ -47,27 +42,34 @@ internal class MalHttpClient : IDisposable
     }
 
 
-    internal async Task<string> PostAsync(string url, HttpContent content, string? token = null)
+    internal static async Task<string> PostAsync(string url, HttpContent content, string? exceptionMessage = null)
     {
-        _httpClient.DefaultRequestHeaders.Clear();
-
-        if (!string.IsNullOrEmpty(token))
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+        
+        var contentString = await content.ReadAsStringAsync();
+        Console.WriteLine($"Request Content: {contentString}");
+        
+        try
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            using var response = await HttpClient.PostAsync(url, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error Response: {errorResponse}");
+            throw new MalHttpException(response.StatusCode, exceptionMessage, malErrorResponse: MalErrorResponse.FromJson(errorResponse));
         }
-        else
+        catch (HttpRequestException e)
         {
-            _httpClient.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", _clientId);
+            throw new MalHttpException(HttpStatusCode.ServiceUnavailable, $"Service unavailable: {e.Message}");
         }
-
-        var response = await _httpClient.PostAsync(url, content);
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadAsStringAsync();
     }
 
-    public void Dispose()
+    public static void Dispose()
     {
-        _httpClient.Dispose();
+        HttpClient.Dispose();
     }
 }

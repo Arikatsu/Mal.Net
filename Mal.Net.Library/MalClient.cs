@@ -12,8 +12,7 @@ namespace Mal.Net;
 /// </summary>
 public class MalClient : IDisposable, IAnimeService, IForumService, IMangaService
 {
-    private readonly MalHttpClient _httpClient;
-
+    
     private readonly string _clientId;
     private readonly string? _clientSecret;
 
@@ -25,7 +24,8 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     public MalClient(string clientId)
     {
         _clientId = clientId;
-        _httpClient = new MalHttpClient(clientId);
+        
+        MalHttpClient.ClientId = clientId;
     }
 
     /// <summary>
@@ -38,7 +38,8 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     {
         _clientId = clientId;
         _clientSecret = clientSecret;
-        _httpClient = new MalHttpClient(clientId);
+        
+        MalHttpClient.ClientId = clientId;
     }
 
     /// <summary>
@@ -46,7 +47,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// </summary>
     public void Dispose()
     {
-        _httpClient?.Dispose();
+        MalHttpClient.Dispose();
 
         GC.SuppressFinalize(this);
     }
@@ -68,7 +69,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
         var error = "Failed to retrieve anime list" + (query != null ? $" for query '{query}'" : string.Empty);
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<AnimeList>.FromJson(response);
         
         return data;
@@ -83,7 +84,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
         var error = $"Failed to retrieve anime details for ID '{animeId}'";
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = AnimeNode.FromJson(response);
         
         return data;
@@ -100,7 +101,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
         var error = $"Failed to retrieve anime ranking for type '{rankingType}'";
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<RankedAnimeList>.FromJson(response);
         
         return data;
@@ -121,7 +122,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             .AddParamIf("sort", sort);
         
         var error = $"Failed to retrieve anime season for {season} {year}";
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<AnimeList>.FromJson(response);
         
         return data;
@@ -140,7 +141,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
         var url = new ApiUrl("forum/boards");
         
         const string error = "Failed to retrieve forum boards";
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Forums.FromJson(response);
         
         return data;
@@ -155,7 +156,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
         var url = new ApiUrl($"forum/topic/{topicId}", new { limit, offset });
         
         var error = $"Failed to retrieve forum topics for ID '{topicId}'";
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<ForumTopicDetail>.FromJson(response);
         
         return data;
@@ -185,7 +186,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             + (topicUserName != null ? $" topic user name '{topicUserName}'." : string.Empty)
             + (userName != null ? $" user name '{userName}'." : string.Empty);
         
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<ForumTopic>.FromJson(response);
         
         return data;
@@ -211,7 +212,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
         var error = "Failed to retrieve manga list" + (query != null ? $" for query '{query}'" : string.Empty);
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<MangaList>.FromJson(response);
         
         return data;
@@ -226,7 +227,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
         var error = $"Failed to retrieve manga details for ID '{mangaId}'";
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = MangaNode.FromJson(response);
         
         return data;
@@ -243,7 +244,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
         var error = $"Failed to retrieve manga ranking for type '{rankingType}'";
-        var response = await _httpClient.GetAsync(url.GetUrl(), error);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
         var data = Paginated<RankedMangaList>.FromJson(response);
         
         return data;
