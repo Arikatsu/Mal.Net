@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using Xunit.Abstractions;
 
-namespace Mal.Net.Testing.MainAuthTests;
+namespace Mal.Net.Testing.ClientAuthTests;
 
-public class MangaTests : MalClientTestsBase
+public class MangaTests : TestsBase
 {
     public MangaTests(ITestOutputHelper output) : base(output) { }
     

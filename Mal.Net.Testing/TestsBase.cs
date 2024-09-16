@@ -4,18 +4,18 @@ using Xunit.Abstractions;
 
 namespace Mal.Net.Testing;
 
-public class MalClientTestsBase
+public class TestsBase
 {
     protected readonly JsonSerializerOptions Options = new() { WriteIndented = true };
     protected readonly ITestOutputHelper Output;
     protected readonly MalClient Client;
 
-    protected MalClientTestsBase(ITestOutputHelper output)
+    protected TestsBase(ITestOutputHelper output)
     {
         Console.SetOut(new LogConverter(output));
 
         var builder = new ConfigurationBuilder()
-            .AddUserSecrets<MalClientTestsBase>()
+            .AddUserSecrets<TestsBase>()
             .Build();
 
         IConfiguration configuration = builder;

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Mal.Net.Utils;
 
-public class SingleDataConverter<T> : JsonConverter<IEnumerable<T>>
+internal class SingleDataConverter<T> : JsonConverter<IEnumerable<T>>
 {
     public override IEnumerable<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
