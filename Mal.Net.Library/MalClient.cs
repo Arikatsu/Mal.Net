@@ -60,9 +60,10 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="limit">The maximum number of results to return. Default is 100.</param>
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<Paginated<AnimeList>> GetAnimeListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
+    /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
+    public async Task<Paginated<AnimeList>> GetAnimeListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl("anime", new { limit, offset })
+        var url = new ApiUrl("anime", new { limit, offset, nsfw = includeNsfw })
             .AddParamIf("q", query)
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
@@ -112,9 +113,10 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="limit">The maximum number of results to return. Default is 100.</param>
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string? sort = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
+    /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
+    public async Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string? sort = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl($"anime/season/{year}/{season}", new { limit, offset })
+        var url = new ApiUrl($"anime/season/{year}/{season}", new { limit, offset, nsfw = includeNsfw })
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()))
             .AddParamIf("sort", sort);
         
@@ -201,9 +203,10 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="limit">The maximum number of results to return. Default is 100.</param>
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<Paginated<MangaList>> GetMangaListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
+    /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
+    public async Task<Paginated<MangaList>> GetMangaListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl("manga", new { limit, offset })
+        var url = new ApiUrl("manga", new { limit, offset, nsfw = includeNsfw })
             .AddParamIf("q", query)
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         

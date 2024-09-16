@@ -15,7 +15,7 @@ public interface IMangaService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<MangaList>> GetMangaListAsync(string query, int limit, int offset, IEnumerable<string> fields);
+    Task<Paginated<MangaList>> GetMangaListAsync(string query, int limit, int offset, IEnumerable<string> fields, bool includeNsfw);
     
     /// <summary>
     /// Retrieves details for a specific manga based on its ID.

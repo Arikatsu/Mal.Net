@@ -18,7 +18,7 @@ public interface IAnimeService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<AnimeList>> GetAnimeListAsync(string query, int limit, int offset, IEnumerable<string> fields);
+    Task<Paginated<AnimeList>> GetAnimeListAsync(string query, int limit, int offset, IEnumerable<string> fields, bool includeMeta);
     
     /// <summary>
     /// Retrieves details for a specific anime based on its ID.
@@ -48,5 +48,5 @@ public interface IAnimeService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string sort, int limit, int offset, IEnumerable<string> fields);
+    Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string sort, int limit, int offset, IEnumerable<string> fields, bool includeNsfw);
 }
