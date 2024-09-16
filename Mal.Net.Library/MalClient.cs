@@ -28,7 +28,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     {
         _clientId = clientId;
         
-        MalHttpClient.ClientId = clientId;
+        MalHttpClient.SetClientId(clientId);
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
         _clientId = clientId;
         _clientSecret = clientSecret;
         
-        MalHttpClient.ClientId = clientId;
+        MalHttpClient.SetClientId(clientId);
     }
 
     /// <summary>
