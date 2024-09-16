@@ -1,9 +1,12 @@
-﻿using Mal.Net.Services;
+﻿using System.Text.Json;
+using Mal.Net.Services;
 using Mal.Net.Utils;
+using Mal.Net.Exceptions;
 using Mal.Net.Schemas;
 using Mal.Net.Schemas.Anime;
 using Mal.Net.Schemas.Forum;
 using Mal.Net.Schemas.Manga;
+using Mal.Net.Schemas.Auth;
 
 namespace Mal.Net;
 
@@ -51,6 +54,78 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
 
         GC.SuppressFinalize(this);
     }
+    
+    
+    #region Authentication API Calls
+    
+    
+    /// <summary>
+    /// Generates the URL for the OAuth2 authorization endpoint.
+    /// </summary>
+    /// <param name="state">The state parameter to include in the URL.</param>
+    /// <param name="codeVerifier">The code verifier parameter to include in the URL.</param>
+    /// <param name="redirectUri">The redirect URI to include in the URL. Leave null if only one redirect URI was specified while creating the MAL API application.</param>
+    /// <returns>The URL for the OAuth2 authorization endpoint.</returns>
+    public string GenerateAuthUrl(out string state, out string? codeVerifier, string? redirectUri = null)
+    {
+        state = AuthHelper.GenerateState();
+        codeVerifier = AuthHelper.GenerateCodeVerifier();
+        
+        var codeChallenge = codeVerifier;
+        
+        var url = new ApiUrl("oauth2/authorize", new
+        {
+            response_type = "code",
+            client_id = _clientId,
+            state, 
+            code_challenge = codeChallenge, 
+            code_challenge_method = "plain"
+        }, forAuth: true)
+            .AddParamIf("redirect_uri", redirectUri);
+        
+        return url.GetUrl();
+    }
+    
+    /// <summary>
+    /// Authenticates a user using the provided authorization code.
+    /// </summary>
+    /// <param name="code">The authorization code to use for authentication.</param>
+    /// <param name="codeVerifier">The code verifier used to generate the authorization code.</param>
+    /// <param name="redirectUri">The redirect URI used to generate the authorization code. Leave null if only one redirect URI was specified while creating the MAL API application.</param>
+    /// <returns>A <see cref="MalUser"/> object representing the authenticated user.</returns>
+    /// <exception cref="MalHttpException">Thrown when the request to the MyAnimeList API fails.</exception>
+    /// <exception cref="JsonException">Thrown when the response from the MyAnimeList API cannot be deserialized.</exception>
+    public async Task<MalUser> AuthenticateUser(string code, string codeVerifier, string? redirectUri = null)
+    {
+        var url = new ApiUrl("oauth2/token", forAuth: true);
+        
+        var keyValuePairs = new List<KeyValuePair<string, string>>
+        {
+            new("client_id", _clientId),
+            new("code", code),
+            new("code_verifier", codeVerifier),
+            new("grant_type", "authorization_code")
+        };
+        
+        if (!string.IsNullOrEmpty(_clientSecret))
+        {
+            keyValuePairs.Add(new KeyValuePair<string, string>("client_secret", _clientSecret));
+        }
+        
+        if (!string.IsNullOrEmpty(redirectUri))
+        {
+            keyValuePairs.Add(new KeyValuePair<string, string>("redirect_uri", redirectUri));
+        }
+        
+        var content = new FormUrlEncodedContent(keyValuePairs);
+        var response = await MalHttpClient.PostAsync(url.GetUrlWithoutParams(), content);
+        var data = OAuthResponse.FromJson(response);
+        
+        return new MalUser(data, _clientId, _clientSecret);
+    }
+    
+    
+    #endregion
 
 
     #region Anime API Calls
