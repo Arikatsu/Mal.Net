@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Mal.Net.Services;
 using Mal.Net.Utils;
 using Mal.Net.Exceptions;
 using Mal.Net.Schemas;
@@ -7,13 +6,14 @@ using Mal.Net.Schemas.Anime;
 using Mal.Net.Schemas.Forum;
 using Mal.Net.Schemas.Manga;
 using Mal.Net.Schemas.Auth;
+using Mal.Net.Services.Base;
 
 namespace Mal.Net;
 
 /// <summary>
 /// Represents the main entry point for interacting with the MyAnimeList API.
 /// </summary>
-public class MalClient : IDisposable, IAnimeService, IForumService, IMangaService
+public class MalClient : MalClientApiBase
 {
     
     private readonly string _clientId;
@@ -43,16 +43,6 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
         _clientSecret = clientSecret;
         
         MalHttpClient.SetClientId(clientId);
-    }
-
-    /// <summary>
-    /// Releases all resources used by the current instance of the <see cref="MalClient"/> class.
-    /// </summary>
-    public void Dispose()
-    {
-        MalHttpClient.Dispose();
-
-        GC.SuppressFinalize(this);
     }
     
     
@@ -137,32 +127,17 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
     /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
-    public async Task<Paginated<AnimeList>> GetAnimeListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
+    public new async Task<Paginated<AnimeList>> GetAnimeListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl("anime", new { limit, offset, nsfw = includeNsfw })
-            .AddParamIf("q", query)
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
-        
-        var error = "Failed to retrieve anime list" + (query != null ? $" for query '{query}'" : string.Empty);
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Paginated<AnimeList>.FromJson(response);
-        
-        return data;
+        return await base.GetAnimeListAsync(query, limit, offset, fields, includeNsfw);
     }
     
     /// <inheritdoc/>
     /// <param name="animeId">The ID of the anime to retrieve details for.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields = null)
+    public new async Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields = null)
     {
-        var url = new ApiUrl($"anime/{animeId}")
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
-        
-        var error = $"Failed to retrieve anime details for ID '{animeId}'";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = AnimeNode.FromJson(response);
-        
-        return data;
+        return await base.GetAnimeDetailsAsync(animeId, fields);
     }
     
     /// <inheritdoc/>
@@ -170,16 +145,9 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="limit">The maximum number of results to return. Default is 100.</param>
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<Paginated<RankedAnimeList>> GetAnimeRankingAsync(string rankingType, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
+    public new async Task<Paginated<RankedAnimeList>> GetAnimeRankingAsync(string rankingType, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
     {
-        var url = new ApiUrl("anime/ranking", new { ranking_type = rankingType, limit, offset })
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
-        
-        var error = $"Failed to retrieve anime ranking for type '{rankingType}'";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Paginated<RankedAnimeList>.FromJson(response);
-        
-        return data;
+        return await base.GetAnimeRankingAsync(rankingType, limit, offset, fields);
     }
 
     /// <inheritdoc/>
@@ -190,17 +158,9 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
     /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
-    public async Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string? sort = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
+    public new async Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string? sort = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl($"anime/season/{year}/{season}", new { limit, offset, nsfw = includeNsfw })
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()))
-            .AddParamIf("sort", sort);
-        
-        var error = $"Failed to retrieve anime season for {season} {year}";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Paginated<AnimeList>.FromJson(response);
-        
-        return data;
+        return await base.GetAnimeSeasonAsync(year, season, sort, limit, offset, fields, includeNsfw);
     }
 
 
@@ -211,30 +171,18 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     
     
     /// <inheritdoc/>
-    public async Task<Forums> GetForumBoardsAsync()
+    public new async Task<Forums> GetForumBoardsAsync()
     {
-        var url = new ApiUrl("forum/boards");
-        
-        const string error = "Failed to retrieve forum boards";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Forums.FromJson(response);
-        
-        return data;
+        return await base.GetForumBoardsAsync();
     }
     
     /// <inheritdoc/>
     /// <param name="topicId">The ID of the topic to retrieve details for.</param>
     /// <param name="limit">The maximum number of results to return. Default is 100.</param>
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
-    public async Task<Paginated<ForumTopicDetail>> GetForumTopicsDetailAsync(int topicId, int limit = 100, int offset = 0)
+    public new async Task<Paginated<ForumTopicDetail>> GetForumTopicsDetailAsync(int topicId, int limit = 100, int offset = 0)
     {
-        var url = new ApiUrl($"forum/topic/{topicId}", new { limit, offset });
-        
-        var error = $"Failed to retrieve forum topics for ID '{topicId}'";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Paginated<ForumTopicDetail>.FromJson(response);
-        
-        return data;
+        return await base.GetForumTopicsDetailAsync(topicId, limit, offset);
     }
     
     /// <inheritdoc/>
@@ -245,26 +193,9 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="userName">The username of the topic poster. Default is null.</param>
     /// <param name="limit">The maximum number of results to return. Default is 100.</param>
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
-    public async Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId = null, int? subBoardId = null, string? query = null, string? topicUserName = null, string? userName = null, int limit = 100, int offset = 0)
+    public new async Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId = null, int? subBoardId = null, string? query = null, string? topicUserName = null, string? userName = null, int limit = 100, int offset = 0)
     {
-        var url = new ApiUrl("forum/topics", new { limit, offset })
-            .AddParamIf("board_id", boardId)
-            .AddParamIf("subboard_id", subBoardId)
-            .AddParamIf("q", query)
-            .AddParamIf("topic_user_name", topicUserName)
-            .AddParamIf("user_name", userName);
-        
-        var error = "Failed to retrieve forum topics for"
-            + (boardId != null ? $" board ID '{boardId}'." : string.Empty)
-            + (subBoardId != null ? $" sub-board ID '{subBoardId}'." : string.Empty)
-            + (query != null ? $" query '{query}'." : string.Empty)
-            + (topicUserName != null ? $" topic user name '{topicUserName}'." : string.Empty)
-            + (userName != null ? $" user name '{userName}'." : string.Empty);
-        
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Paginated<ForumTopic>.FromJson(response);
-        
-        return data;
+        return await base.GetForumTopicsAsync(boardId, subBoardId, query, topicUserName, userName, limit, offset);
     }
     
     
@@ -280,32 +211,17 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
     /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
-    public async Task<Paginated<MangaList>> GetMangaListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
+    public new async Task<Paginated<MangaList>> GetMangaListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl("manga", new { limit, offset, nsfw = includeNsfw })
-            .AddParamIf("q", query)
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
-        
-        var error = "Failed to retrieve manga list" + (query != null ? $" for query '{query}'" : string.Empty);
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Paginated<MangaList>.FromJson(response);
-        
-        return data;
+        return await base.GetMangaListAsync(query, limit, offset, fields, includeNsfw);
     }
     
     /// <inheritdoc/>
     /// <param name="mangaId">The ID of the manga to retrieve details for.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<MangaNode> GetMangaDetailsAsync(int mangaId, IEnumerable<string>? fields = null)
+    public new async Task<MangaNode> GetMangaDetailsAsync(int mangaId, IEnumerable<string>? fields = null)
     {
-        var url = new ApiUrl($"manga/{mangaId}")
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
-        
-        var error = $"Failed to retrieve manga details for ID '{mangaId}'";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = MangaNode.FromJson(response);
-        
-        return data;
+        return await base.GetMangaDetailsAsync(mangaId, fields);
     }
     
     /// <inheritdoc/>
@@ -313,16 +229,9 @@ public class MalClient : IDisposable, IAnimeService, IForumService, IMangaServic
     /// <param name="limit">The maximum number of results to return. Default is 100.</param>
     /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
     /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    public async Task<Paginated<RankedMangaList>> GetMangaRankingAsync(string rankingType, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
+    public new async Task<Paginated<RankedMangaList>> GetMangaRankingAsync(string rankingType, int limit = 100, int offset = 0, IEnumerable<string>? fields = null)
     {
-        var url = new ApiUrl("manga/ranking", new { ranking_type = rankingType, limit, offset })
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
-        
-        var error = $"Failed to retrieve manga ranking for type '{rankingType}'";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error);
-        var data = Paginated<RankedMangaList>.FromJson(response);
-        
-        return data;
+        return await base.GetMangaRankingAsync(rankingType, limit, offset, fields);
     }
     
     

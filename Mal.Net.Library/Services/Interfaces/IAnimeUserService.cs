@@ -3,7 +3,7 @@ using Mal.Net.Exceptions;
 using Mal.Net.Schemas;
 using Mal.Net.Schemas.Anime;
 
-namespace Mal.Net.Services;
+namespace Mal.Net.Services.Interfaces;
 
 /// <summary>
 /// Defines methods for interacting with anime-related API endpoints that require user authentication.

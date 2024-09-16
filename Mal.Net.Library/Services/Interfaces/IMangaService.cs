@@ -3,7 +3,7 @@ using Mal.Net.Exceptions;
 using Mal.Net.Schemas;
 using Mal.Net.Schemas.Manga;
 
-namespace Mal.Net.Services;
+namespace Mal.Net.Services.Interfaces;
 
 public interface IMangaService
 {

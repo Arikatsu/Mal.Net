@@ -3,7 +3,7 @@ using Mal.Net.Exceptions;
 using Mal.Net.Schemas;
 using Mal.Net.Schemas.Forum;
 
-namespace Mal.Net.Services;
+namespace Mal.Net.Services.Interfaces;
 
 /// <summary>
 /// Defines methods for interacting with forum-related API endpoints.
