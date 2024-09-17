@@ -7,7 +7,7 @@ namespace Mal.Net.Utils;
 
 internal static class MalHttpClient
 {
-    private static readonly object Lock = new object();
+    private static readonly object Lock = new();
     private static readonly HttpClient HttpClient = new();
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
 

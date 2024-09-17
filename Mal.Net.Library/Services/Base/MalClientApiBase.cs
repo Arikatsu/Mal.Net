@@ -29,7 +29,7 @@ public class MalClientApiBase : IAnimeService, IForumService, IMangaService
     /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
     public async Task<Paginated<AnimeList>> GetAnimeListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl("anime", new { limit, offset, nsfw = includeNsfw })
+        var url = new ApiUrl("anime", new { limit, offset, nsfw = includeNsfw.ToString().ToLower() })
             .AddParamIf("q", query)
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
@@ -82,7 +82,7 @@ public class MalClientApiBase : IAnimeService, IForumService, IMangaService
     /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
     public async Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string? sort = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl($"anime/season/{year}/{season}", new { limit, offset, nsfw = includeNsfw })
+        var url = new ApiUrl($"anime/season/{year}/{season}", new { limit, offset, nsfw = includeNsfw.ToString().ToLower() })
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()))
             .AddParamIf("sort", sort);
         
@@ -172,7 +172,7 @@ public class MalClientApiBase : IAnimeService, IForumService, IMangaService
     /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
     public async Task<Paginated<MangaList>> GetMangaListAsync(string? query = null, int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
     {
-        var url = new ApiUrl("manga", new { limit, offset, nsfw = includeNsfw })
+        var url = new ApiUrl("manga", new { limit, offset, nsfw = includeNsfw.ToString().ToLower() })
             .AddParamIf("q", query)
             .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
         
