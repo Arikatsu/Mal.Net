@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Xunit.Abstractions;
 
-namespace Mal.Net.Testing;
+namespace Mal.Net.Testing.Utils;
 
 internal class LogConverter : TextWriter
 {
