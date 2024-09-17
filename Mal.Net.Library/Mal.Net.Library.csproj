@@ -16,8 +16,4 @@
     <RepositoryUrl>https://github.com/Arikatsu/Mal.Net</RepositoryUrl>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Interface" />
-  </ItemGroup>
-
 </Project>

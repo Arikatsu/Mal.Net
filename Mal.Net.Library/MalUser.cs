@@ -17,10 +17,10 @@ public class MalUser : MalUserApiBase
 {
     #region Public Properties
     
-    public string? AccessToken { get; }
-    public string? RefreshToken { get; }
-    public string? TokenType { get; }
-    public DateTime AccessTokenExpiresAt { get; }
+    public string? AccessToken { get; private set; }
+    public string? RefreshToken { get; private set; }
+    public string? TokenType { get; private set; }
+    public DateTime AccessTokenExpiresAt { get; private set; }
     
     #endregion
     
@@ -84,11 +84,20 @@ public class MalUser : MalUserApiBase
     /// <summary>
     /// Refreshes the access token.
     /// </summary>
+    /// <remarks>
+    /// If the access token has not expired, this method will return the current user.
+    /// </remarks>
+    /// <param name="force">Whether to force the refresh of the access token.</param>
     /// <returns>The refreshed user.</returns>
     /// <exception cref="MalHttpException">Thrown when the request to refresh the access token fails.</exception>
     /// <exception cref="JsonException">Thrown when the response from the server is not valid JSON.</exception>
-    public async Task<MalUser> RefreshAccessToken()
+    public async Task<MalUser> RefreshAccessToken(bool force = false)
     {
+        if (!force && !IsAccessTokenExpired())
+        {
+            return this;
+        }
+        
         var url = new ApiUrl("oauth2/token", forAuth: true);
         
         var keyValuePairs = new List<KeyValuePair<string?, string?>>
@@ -107,6 +116,13 @@ public class MalUser : MalUserApiBase
         var response = await MalHttpClient.PostAsync(url.GetUrlWithoutParams(), content, "Failed to refresh access token");
         var data = OAuthResponse.FromJson(response);
         
-        return new MalUser(data, _clientId, _clientSecret);
+        AccessToken = data.AccessToken;
+        RefreshToken = data.RefreshToken;
+        TokenType = data.TokenType;
+        AccessTokenExpiresAt = DateTime.UtcNow.AddSeconds(data.ExpiresIn);
+        
+        SetAccessToken(AccessToken, TokenType);
+        
+        return this;
     }
 }

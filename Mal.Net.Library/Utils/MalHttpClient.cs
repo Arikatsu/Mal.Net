@@ -38,6 +38,7 @@ internal static class MalHttpClient
         }
         else
         {
+            Semaphore.Release();
             throw new MalHttpException(HttpStatusCode.BadRequest, "Client ID not set");
         }
 
@@ -66,9 +67,6 @@ internal static class MalHttpClient
     internal static async Task<string> PostAsync(string url, HttpContent content, string? exceptionMessage = null)
     {
         content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-        var contentString = await content.ReadAsStringAsync();
-        Console.WriteLine($"Request Content: {contentString}");
 
         try
         {
