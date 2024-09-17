@@ -9,10 +9,16 @@ namespace Mal.Net.Services.Base;
 
 public class MalClientApiBase : IAnimeService, IForumService, IMangaService
 {
-    protected readonly string? AccessToken;
-    protected readonly string? TokenType;
+    protected string? AccessToken;
+    protected string? TokenType;
     
     protected MalClientApiBase(string? accessToken = null, string? tokenType = null)
+    {
+        AccessToken = accessToken;
+        TokenType = tokenType;
+    }
+    
+    protected void SetAccessToken(string? accessToken, string? tokenType)
     {
         AccessToken = accessToken;
         TokenType = tokenType;
