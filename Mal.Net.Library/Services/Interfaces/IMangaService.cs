@@ -15,7 +15,7 @@ public interface IMangaService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<MangaList>> GetMangaListAsync(string query, int limit, int offset, IEnumerable<string> fields, bool includeNsfw);
+    Task<Paginated<MangaList>> GetMangaListAsync(string query, MalRequestOptions options, CancellationToken cancellationToken);
     
     /// <summary>
     /// Retrieves details for a specific manga based on its ID.
@@ -25,7 +25,7 @@ public interface IMangaService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<MangaNode> GetMangaDetailsAsync(int mangaId, IEnumerable<string>? fields);
+    Task<MangaNode> GetMangaDetailsAsync(int mangaId, IEnumerable<string>? fields, CancellationToken cancellationToken);
     
     /// <summary>
     /// Retrieves a list of manga based on the current ranking type.
@@ -35,5 +35,5 @@ public interface IMangaService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<RankedMangaList>> GetMangaRankingAsync(string rankingType, int limit, int offset, IEnumerable<string> fields);
+    Task<Paginated<RankedMangaList>> GetMangaRankingAsync(string rankingType, MalRequestOptions options, CancellationToken cancellationToken);
 }

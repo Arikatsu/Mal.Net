@@ -18,5 +18,5 @@ public interface IAnimeUserService : IAnimeService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<AnimeList>> GetSuggestedAnimeAsync(int limit, int offset, IEnumerable<string> fields, bool includeNsfw);
+    Task<Paginated<AnimeList>> GetSuggestedAnimeAsync(MalRequestOptions options, CancellationToken cancellationToken);
 }

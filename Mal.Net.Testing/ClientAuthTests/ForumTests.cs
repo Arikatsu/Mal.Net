@@ -32,7 +32,11 @@ public class ForumTests : TestsBase
     [Fact]
     public async Task ForumTopicsTest()
     {
-        var forumTopics = await Client.GetForumTopicsAsync(query: "oregairu");
+        var forumTopics = await Client.GetForumTopicsAsync(new ForumTopicOptions
+        {
+            Limit = 10,
+            Query = "oregairu"
+        });
         
         var json = JsonSerializer.Serialize(forumTopics, Options);
         Output.WriteLine(json);

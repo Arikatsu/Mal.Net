@@ -82,10 +82,11 @@ public class MalClient : MalClientApiBase
     /// <param name="code">The authorization code to use for authentication.</param>
     /// <param name="codeVerifier">The code verifier used to generate the authorization code.</param>
     /// <param name="redirectUri">The redirect URI used to generate the authorization code. Leave null if only one redirect URI was specified while creating the MAL API application.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel the asynchronous operation. Default is <see cref="CancellationToken.None"/>.</param>
     /// <returns>A <see cref="MalUser"/> object representing the authenticated user.</returns>
     /// <exception cref="MalHttpException">Thrown when the request to the MyAnimeList API fails.</exception>
     /// <exception cref="JsonException">Thrown when the response from the MyAnimeList API cannot be deserialized.</exception>
-    public async Task<MalUser> AuthenticateUser(string code, string codeVerifier, string? redirectUri = null)
+    public async Task<MalUser> AuthenticateUser(string code, string codeVerifier, string? redirectUri = null, CancellationToken cancellationToken = default)
     {
         var url = new ApiUrl("oauth2/token", forAuth: true);
         
@@ -108,7 +109,7 @@ public class MalClient : MalClientApiBase
         }
         
         var content = new FormUrlEncodedContent(keyValuePairs);
-        var response = await MalHttpClient.PostAsync(url.GetUrlWithoutParams(), content);
+        var response = await MalHttpClient.PostAsync(url.GetUrlWithoutParams(), content, "Failed to authenticate user", cancellationToken);
         var data = OAuthResponse.FromJson(response);
         
         return new MalUser(data, _clientId, _clientSecret);

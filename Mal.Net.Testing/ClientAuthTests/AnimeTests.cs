@@ -12,7 +12,13 @@ public class AnimeTests : TestsBase
     {
         IEnumerable<string> fields = new List<string> { AnimeFields.Rating, AnimeFields.StartDate };
 
-        var animeList = await Client.GetAnimeListAsync("oregairu", 1, 1, fields);
+        var animeList = await Client.GetAnimeListAsync("oregairu", 
+            new MalRequestOptions
+            {
+                Limit = 10,
+                Fields = fields
+            }, 
+            CancellationToken.None);
 
         var json = JsonSerializer.Serialize(animeList, Options);
         Output.WriteLine(json);
@@ -25,7 +31,7 @@ public class AnimeTests : TestsBase
     {
         IEnumerable<string> fields = new List<string> { AnimeFields.Rating, AnimeFields.StartDate };
 
-        var animeDetails = await Client.GetAnimeDetailsAsync(33161, fields);
+        var animeDetails = await Client.GetAnimeDetailsAsync(33161, fields, CancellationToken.None);
 
         var json = JsonSerializer.Serialize(animeDetails, Options);
         Output.WriteLine(json);
@@ -37,7 +43,12 @@ public class AnimeTests : TestsBase
     public async Task AnimeRankingTest()
     {
 
-        var animeRanking = await Client.GetAnimeRankingAsync("airing", 10);
+        var animeRanking = await Client.GetAnimeRankingAsync("airing", 
+            new MalRequestOptions
+            {
+                Limit = 10
+            }, 
+            CancellationToken.None);
 
         var json = JsonSerializer.Serialize(animeRanking, Options);
         Output.WriteLine(json);
@@ -48,7 +59,11 @@ public class AnimeTests : TestsBase
     [Fact]
     public async Task AnimeSeasonTest()
     {
-        var animeSeason = await Client.GetAnimeSeasonAsync(2024, "summer", "anime_score", 10);
+        var animeSeason = await Client.GetAnimeSeasonAsync(2024, "summer", "anime_score", 
+            new MalRequestOptions
+            {
+                Limit = 10
+            });
 
         var json = JsonSerializer.Serialize(animeSeason, Options);
         Output.WriteLine(json);

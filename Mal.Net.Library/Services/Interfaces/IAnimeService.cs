@@ -18,7 +18,7 @@ public interface IAnimeService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<AnimeList>> GetAnimeListAsync(string query, int limit, int offset, IEnumerable<string> fields, bool includeMeta);
+    Task<Paginated<AnimeList>> GetAnimeListAsync(string query, MalRequestOptions options, CancellationToken cancellationToken);
     
     /// <summary>
     /// Retrieves details for a specific anime based on its ID.
@@ -28,7 +28,7 @@ public interface IAnimeService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields);
+    Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields, CancellationToken cancellationToken);
     
     /// <summary>
     /// Retrieves a list of anime based on the current ranking type.
@@ -38,7 +38,7 @@ public interface IAnimeService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<RankedAnimeList>> GetAnimeRankingAsync(string rankingType, int limit, int offset, IEnumerable<string> fields);
+    Task<Paginated<RankedAnimeList>> GetAnimeRankingAsync(string rankingType, MalRequestOptions options, CancellationToken cancellationToken);
     
     /// <summary>
     /// Retrieves a list of anime based on the current season.
@@ -48,5 +48,5 @@ public interface IAnimeService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string sort, int limit, int offset, IEnumerable<string> fields, bool includeNsfw);
+    Task<Paginated<AnimeList>> GetAnimeSeasonAsync(int year, string season, string sort, MalRequestOptions options, CancellationToken cancellationToken);
 }

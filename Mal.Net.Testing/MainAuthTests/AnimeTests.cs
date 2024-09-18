@@ -12,7 +12,14 @@ public class AnimeTests : TestsBase
     {
         IEnumerable<string> fields = new List<string> { AnimeFields.Rating, AnimeFields.StartDate };
         
-        var suggestedAnime = await User.GetSuggestedAnimeAsync(1, 1, fields, true);
+        var suggestedAnime = await User.GetSuggestedAnimeAsync(
+            new MalRequestOptions
+            {
+                Limit = 10,
+                Fields = fields,
+                IncludeNsfw = true
+            }, 
+            CancellationToken.None);
         
         var json = JsonSerializer.Serialize(suggestedAnime, Options);
         Output.WriteLine(json);

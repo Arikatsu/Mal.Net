@@ -88,10 +88,11 @@ public class MalUser : MalUserApiBase
     /// If the access token has not expired, this method will return the current user.
     /// </remarks>
     /// <param name="force">Whether to force the refresh of the access token.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel the asynchronous operation. Default is <see cref="CancellationToken.None"/>.</param>
     /// <returns>The refreshed user.</returns>
     /// <exception cref="MalHttpException">Thrown when the request to refresh the access token fails.</exception>
     /// <exception cref="JsonException">Thrown when the response from the server is not valid JSON.</exception>
-    public async Task<MalUser> RefreshAccessToken(bool force = false)
+    public async Task<MalUser> RefreshAccessToken(bool force = false, CancellationToken cancellationToken = default)
     {
         if (!force && !IsAccessTokenExpired())
         {
@@ -113,7 +114,7 @@ public class MalUser : MalUserApiBase
         }
         
         var content = new FormUrlEncodedContent(keyValuePairs);
-        var response = await MalHttpClient.PostAsync(url.GetUrlWithoutParams(), content, "Failed to refresh access token");
+        var response = await MalHttpClient.PostAsync(url.GetUrlWithoutParams(), content, "Failed to refresh access token", cancellationToken);
         var data = OAuthResponse.FromJson(response);
         
         AccessToken = data.AccessToken;

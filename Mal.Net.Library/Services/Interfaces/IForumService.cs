@@ -18,7 +18,7 @@ public interface IForumService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Forums> GetForumBoardsAsync();
+    Task<Forums> GetForumBoardsAsync(CancellationToken cancellationToken);
     
     /// <summary>
     /// Retrieves a list of forum topics based on the provided topic ID.
@@ -28,7 +28,7 @@ public interface IForumService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<ForumTopicDetail>> GetForumTopicsDetailAsync(int topicId, int limit, int offset);
+    Task<Paginated<ForumTopicDetail>> GetForumTopicsDetailAsync(int topicId, MalRequestOptions options, CancellationToken cancellationToken);
     
     /// <summary>
     /// Retrieves a list of forum topics based on the provided query parameters.
@@ -38,5 +38,5 @@ public interface IForumService
     /// </returns>
     /// <exception cref="MalHttpException">Thrown when an HTTP error occurs.</exception>
     /// <exception cref="JsonException">Thrown when an error occurs while deserializing the JSON response.</exception>
-    Task<Paginated<ForumTopic>> GetForumTopicsAsync(int? boardId, int? subBoardId, string query, string topicUserName, string userName, int limit, int offset);
+    Task<Paginated<ForumTopic>> GetForumTopicsAsync(ForumTopicOptions options, CancellationToken cancellationToken);
 }

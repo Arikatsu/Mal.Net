@@ -2,8 +2,6 @@
 using Mal.Net.Utils;
 using Mal.Net.Schemas;
 using Mal.Net.Schemas.Anime;
-using Mal.Net.Schemas.Forum;
-using Mal.Net.Schemas.Manga;
 
 namespace Mal.Net.Services.Base;
 
@@ -13,17 +11,17 @@ public class MalUserApiBase : MalClientApiBase, IAnimeUserService
         : base(accessToken, tokenType) { }
     
     /// <inheritdoc />
-    /// <param name="limit">The maximum number of results to return. Default is 100.</param>
-    /// <param name="offset">The number of results to skip before starting to return results. Default is 0.</param>
-    /// <param name="fields">Additional fields to include in the JSON response. Default is null.</param>
-    /// <param name="includeNsfw">Whether to include NSFW content in the results. Default is false.</param>
-    public async Task<Paginated<AnimeList>> GetSuggestedAnimeAsync(int limit = 100, int offset = 0, IEnumerable<string>? fields = null, bool includeNsfw = false)
+    /// <param name="options">The optional parameters to include in the request. For default values see <see cref="MalRequestOptions"/>.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel the asynchronous operation. Default is <see cref="CancellationToken.None"/>.</param>
+    public async Task<Paginated<AnimeList>> GetSuggestedAnimeAsync(MalRequestOptions? options = null, CancellationToken cancellationToken = default)
     {
-        var url = new ApiUrl("anime/suggestions", new { limit, offset, nsfw = includeNsfw.ToString().ToLower() })
-            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(fields ?? Enumerable.Empty<string>()));
+        options ??= new MalRequestOptions();
+        var url = new ApiUrl("anime/suggestions",
+                new { limit = options.Limit, offset = options.Offset, nsfw = options.IncludeNsfw.ToString().ToLower() })
+            .AddParamIf("fields", StringHelper.ToCommaSeparatedString(options.Fields));
         
         const string error = "Failed to retrieve suggested anime list";
-        var response = await MalHttpClient.GetAsync(url.GetUrl(), error, TokenType, AccessToken);
+        var response = await MalHttpClient.GetAsync(url.GetUrl(), error, TokenType, AccessToken, cancellationToken);
         var data = Paginated<AnimeList>.FromJson(response);
 
         return data;
