@@ -9,8 +9,8 @@ public class TestsBase
     protected readonly JsonSerializerOptions Options = new() { WriteIndented = true };
     protected readonly ITestOutputHelper Output;
     
-    protected readonly MalClient Client;
-    protected readonly MalUser User;
+    protected readonly IMalClient Client;
+    protected readonly IMalUser User;
     
     protected readonly ConfigManager ConfigManager;
     protected readonly Config Config;

@@ -1,19 +1,14 @@
-﻿using System.Text.Json;
-using Mal.Net.Schemas;
-using Mal.Net.Schemas.Auth;
-using Mal.Net.Schemas.Anime;
-using Mal.Net.Schemas.Forum;
-using Mal.Net.Schemas.Manga;
+﻿using Mal.Net.Core;
+using Mal.Net.Models;
+using Mal.Net.Models.Auth;
+using Mal.Net.Models.Forum;
+using Mal.Net.Models.Manga;
+using Mal.Net.Models.Anime;
 using Mal.Net.Utils;
-using Mal.Net.Exceptions;
-using Mal.Net.Services.Base;
 
 namespace Mal.Net;
 
-/// <summary>
-/// Represents a user that has been authenticated with MyAnimeList.
-/// </summary>
-public class MalUser : MalUserApiBase
+public class MalUser : MalApiBase, IMalUser
 {
     #region Public Properties
     
@@ -28,6 +23,7 @@ public class MalUser : MalUserApiBase
     
     private readonly string _clientId;
     private readonly string? _clientSecret;
+    private readonly KeyValuePair<string, string> _header;
     
     #endregion
     
@@ -38,7 +34,6 @@ public class MalUser : MalUserApiBase
     /// <param name="clientId">The client ID.</param>
     /// <param name="clientSecret">The client secret.</param>
     public MalUser(OAuthResponse response, string clientId, string? clientSecret = null)
-        : base(response.AccessToken, response.TokenType)
     {
         AccessToken = response.AccessToken;
         RefreshToken = response.RefreshToken;
@@ -47,6 +42,7 @@ public class MalUser : MalUserApiBase
         
         _clientId = clientId;
         _clientSecret = clientSecret;
+        _header = new KeyValuePair<string, string>("Authorization", $"{TokenType} {AccessToken}");
     }
     
     /// <summary>
@@ -59,7 +55,6 @@ public class MalUser : MalUserApiBase
     /// <param name="clientId">The client ID.</param>
     /// <param name="clientSecret">The client secret.</param>
     public MalUser(string accessToken, string refreshToken, string tokenType, int expiresIn, string clientId, string? clientSecret = null)
-        : base(accessToken, tokenType)
     {
         AccessToken = accessToken;
         RefreshToken = refreshToken;
@@ -68,31 +63,18 @@ public class MalUser : MalUserApiBase
         
         _clientId = clientId;
         _clientSecret = clientSecret;
+        _header = new KeyValuePair<string, string>("Authorization", $"{TokenType} {AccessToken}");
     }
     
-    /// <summary>
-    /// Determines whether the access token has expired.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> if the access token has expired; otherwise, <see langword="false"/>.
-    /// </returns>
+    #region Authentication API Calls
+    
+    
     public bool IsAccessTokenExpired()
     {
         return DateTime.UtcNow >= AccessTokenExpiresAt;
     }
     
-    /// <summary>
-    /// Refreshes the access token.
-    /// </summary>
-    /// <remarks>
-    /// If the access token has not expired, this method will return the current user.
-    /// </remarks>
-    /// <param name="force">Whether to force the refresh of the access token.</param>
-    /// <param name="cancellationToken">The cancellation token to cancel the asynchronous operation. Default is <see cref="CancellationToken.None"/>.</param>
-    /// <returns>The refreshed user.</returns>
-    /// <exception cref="MalHttpException">Thrown when the request to refresh the access token fails.</exception>
-    /// <exception cref="JsonException">Thrown when the response from the server is not valid JSON.</exception>
-    public async Task<MalUser> RefreshAccessToken(bool force = false, CancellationToken cancellationToken = default)
+    public async Task<IMalUser> RefreshAccessTokenAsync(bool force = false, CancellationToken cancellationToken = default)
     {
         if (!force && !IsAccessTokenExpired())
         {
@@ -121,9 +103,109 @@ public class MalUser : MalUserApiBase
         RefreshToken = data.RefreshToken;
         TokenType = data.TokenType;
         AccessTokenExpiresAt = DateTime.UtcNow.AddSeconds(data.ExpiresIn);
-        
-        SetAccessToken(AccessToken, TokenType);
-        
+
         return this;
     }
+    
+    
+    #endregion
+    
+    #region Anime API Calls
+
+
+    public async Task<Paginated<AnimeList>> GetAnimeListAsync(
+        string? query = null, 
+        MalRequestOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeListCoreAsync(_header, query, options, cancellationToken);
+    }
+    
+    public async Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields = null, CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeDetailsCoreAsync(_header, animeId, fields, cancellationToken);
+    }
+    
+    public async Task<Paginated<RankedAnimeList>> GetAnimeRankingAsync(
+        string rankingType, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeRankingCoreAsync(_header, rankingType, options, cancellationToken);
+    }
+    
+    public async Task<Paginated<AnimeList>> GetAnimeSeasonAsync(
+        int year, 
+        string season, 
+        string? sort = null, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeSeasonCoreAsync(_header, year, season, sort, options, cancellationToken);
+    }
+    
+    public async Task<Paginated<AnimeList>> GetSuggestedAnimeAsync(
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetSuggestedAnimeCoreAsync(_header, options, cancellationToken);
+    }
+    
+    
+    #endregion
+    
+    #region Forum API Calls
+    
+    
+    public async Task<Forums> GetForumBoardsAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetForumBoardsCoreAsync(_header, cancellationToken);
+    }
+
+    public async Task<Paginated<ForumTopicDetail>> GetForumTopicsDetailAsync(
+        int topicId,
+        MalRequestOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetForumTopicsDetailCoreAsync(_header, topicId, options, cancellationToken);
+    }
+    
+    public async Task<Paginated<ForumTopic>> GetForumTopicsAsync(
+        ForumTopicOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetForumTopicsCoreAsync(_header, options, cancellationToken);
+    }
+    
+    
+    #endregion
+    
+    #region Manga API Calls
+    
+    public async Task<Paginated<MangaList>> GetMangaListAsync(
+        string? query = null, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetMangaListCoreAsync(_header, query, options, cancellationToken);
+    }
+    
+    public async Task<MangaNode> GetMangaDetailsAsync(
+        int mangaId, 
+        IEnumerable<string>? fields = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetMangaDetailsCoreAsync(_header, mangaId, fields, cancellationToken);
+    }
+    
+    public async Task<Paginated<RankedMangaList>> GetMangaRankingAsync(
+        string rankingType, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetMangaRankingCoreAsync(_header, rankingType, options, cancellationToken);
+    }
+    
+    
+    #endregion
 }

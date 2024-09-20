@@ -42,7 +42,6 @@ public class AnimeTests : TestsBase
     [Fact]
     public async Task AnimeRankingTest()
     {
-
         var animeRanking = await Client.GetAnimeRankingAsync("airing", 
             new MalRequestOptions
             {

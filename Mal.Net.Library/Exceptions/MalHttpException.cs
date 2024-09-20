@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Mal.Net.Schemas;
+using Mal.Net.Models;
 
 namespace Mal.Net.Exceptions;
 

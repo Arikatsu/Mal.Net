@@ -1,23 +1,21 @@
 ﻿using System.Text.Json;
 using Mal.Net.Utils;
 using Mal.Net.Exceptions;
-using Mal.Net.Schemas;
-using Mal.Net.Schemas.Anime;
-using Mal.Net.Schemas.Forum;
-using Mal.Net.Schemas.Manga;
-using Mal.Net.Schemas.Auth;
-using Mal.Net.Services.Base;
+using Mal.Net.Core;
+using Mal.Net.Models;
+using Mal.Net.Models.Anime;
+using Mal.Net.Models.Auth;
+using Mal.Net.Models.Forum;
+using Mal.Net.Models.Manga;
 
 namespace Mal.Net;
 
-/// <summary>
-/// Represents the main entry point for interacting with the MyAnimeList API.
-/// </summary>
-public class MalClient : MalClientApiBase
+public class MalClient : MalApiBase, IMalClient
 {
     
     private readonly string _clientId;
     private readonly string? _clientSecret;
+    private readonly KeyValuePair<string, string> _header;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MalClient"/> class using only the client ID.
@@ -27,8 +25,7 @@ public class MalClient : MalClientApiBase
     public MalClient(string clientId)
     {
         _clientId = clientId;
-        
-        MalHttpClient.SetClientId(clientId);
+        _header = new KeyValuePair<string, string>("X-MAL-Client-ID", clientId);
     }
 
     /// <summary>
@@ -41,22 +38,13 @@ public class MalClient : MalClientApiBase
     {
         _clientId = clientId;
         _clientSecret = clientSecret;
-        
-        MalHttpClient.SetClientId(clientId);
+        _header = new KeyValuePair<string, string>("X-MAL-Client-ID", clientId);
     }
     
     
     #region Authentication API Calls
     
-    
-    /// <summary>
-    /// Generates the URL for the OAuth2 authorization endpoint.
-    /// </summary>
-    /// <param name="state">The state parameter to include in the URL.</param>
-    /// <param name="codeVerifier">The code verifier parameter to include in the URL.</param>
-    /// <param name="redirectUri">The redirect URI to include in the URL. Leave null if only one redirect URI was specified while creating the MAL API application.</param>
-    /// <returns>The URL for the OAuth2 authorization endpoint.</returns>
-    public string GenerateAuthUrl(out string state, out string? codeVerifier, string? redirectUri = null)
+    public string GenerateAuthorizationUrl(out string state, out string? codeVerifier, string? redirectUri = null)
     {
         state = AuthHelper.GenerateState();
         codeVerifier = AuthHelper.GenerateCodeVerifier();
@@ -76,17 +64,7 @@ public class MalClient : MalClientApiBase
         return url.GetUrl();
     }
     
-    /// <summary>
-    /// Authenticates a user using the provided authorization code.
-    /// </summary>
-    /// <param name="code">The authorization code to use for authentication.</param>
-    /// <param name="codeVerifier">The code verifier used to generate the authorization code.</param>
-    /// <param name="redirectUri">The redirect URI used to generate the authorization code. Leave null if only one redirect URI was specified while creating the MAL API application.</param>
-    /// <param name="cancellationToken">The cancellation token to cancel the asynchronous operation. Default is <see cref="CancellationToken.None"/>.</param>
-    /// <returns>A <see cref="MalUser"/> object representing the authenticated user.</returns>
-    /// <exception cref="MalHttpException">Thrown when the request to the MyAnimeList API fails.</exception>
-    /// <exception cref="JsonException">Thrown when the response from the MyAnimeList API cannot be deserialized.</exception>
-    public async Task<MalUser> AuthenticateUser(string code, string codeVerifier, string? redirectUri = null, CancellationToken cancellationToken = default)
+    public async Task<MalUser> AuthenticateUserAsync(string code, string codeVerifier, string? redirectUri = null, CancellationToken cancellationToken = default)
     {
         var url = new ApiUrl("oauth2/token", forAuth: true);
         
@@ -113,6 +91,98 @@ public class MalClient : MalClientApiBase
         var data = OAuthResponse.FromJson(response);
         
         return new MalUser(data, _clientId, _clientSecret);
+    }
+    
+    
+    #endregion
+    
+    #region Anime API Calls
+
+
+    public async Task<Paginated<AnimeList>> GetAnimeListAsync(
+        string? query = null, 
+        MalRequestOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeListCoreAsync(_header, query, options, cancellationToken);
+    }
+    
+    public async Task<AnimeNode> GetAnimeDetailsAsync(int animeId, IEnumerable<string>? fields = null, CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeDetailsCoreAsync(_header, animeId, fields, cancellationToken);
+    }
+    
+    public async Task<Paginated<RankedAnimeList>> GetAnimeRankingAsync(
+        string rankingType, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeRankingCoreAsync(_header, rankingType, options, cancellationToken);
+    }
+    
+    public async Task<Paginated<AnimeList>> GetAnimeSeasonAsync(
+        int year, 
+        string season, 
+        string? sort = null, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetAnimeSeasonCoreAsync(_header, year, season, sort, options, cancellationToken);
+    }
+    
+    
+    #endregion
+    
+    #region Forum API Calls
+    
+    
+    public async Task<Forums> GetForumBoardsAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetForumBoardsCoreAsync(_header, cancellationToken);
+    }
+
+    public async Task<Paginated<ForumTopicDetail>> GetForumTopicsDetailAsync(
+        int topicId,
+        MalRequestOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetForumTopicsDetailCoreAsync(_header, topicId, options, cancellationToken);
+    }
+    
+    public async Task<Paginated<ForumTopic>> GetForumTopicsAsync(
+        ForumTopicOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetForumTopicsCoreAsync(_header, options, cancellationToken);
+    }
+    
+    
+    #endregion
+    
+    #region Manga API Calls
+    
+    public async Task<Paginated<MangaList>> GetMangaListAsync(
+        string? query = null, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetMangaListCoreAsync(_header, query, options, cancellationToken);
+    }
+    
+    public async Task<MangaNode> GetMangaDetailsAsync(
+        int mangaId, 
+        IEnumerable<string>? fields = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetMangaDetailsCoreAsync(_header, mangaId, fields, cancellationToken);
+    }
+    
+    public async Task<Paginated<RankedMangaList>> GetMangaRankingAsync(
+        string rankingType, 
+        MalRequestOptions? options = null, 
+        CancellationToken cancellationToken = default)
+    {
+        return await GetMangaRankingCoreAsync(_header, rankingType, options, cancellationToken);
     }
     
     

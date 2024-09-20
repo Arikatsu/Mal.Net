@@ -66,3 +66,49 @@ public class ForumTopicOptions
     /// </summary>
     public int Offset { get; set; } = 0;
 }
+
+/// <summary>
+/// Options for updating the status of an anime or manga in the user's list.
+/// </summary>
+public class AnimeListStatusOptions
+{
+    /// <summary>
+    /// The status of the anime. Default is null.
+    /// </summary>
+    public string? Status { get; set; } = null;
+    
+    /// <summary>
+    /// Is the user rewatching the anime? Default is null.
+    public string? IsRewatching { get; set; } = null;
+    
+    /// <summary>
+    /// The score the user has given the anime. Default is null.
+    /// </summary>
+    public int? Score { get; set; } = null;
+    
+    /// <summary>
+    /// The number of episodes the user has watched. Default is null.
+    /// </summary>
+    public int? NumWatchedEpisodes { get; set; } = null;
+    
+    /// <summary>
+    /// The start date of the anime in the user's list. Default is null.
+    /// </summary>
+    public DateTime? StartDate { get; set; } = null;
+    
+    /// <summary>
+    /// The end date of the anime in the user's list. Default is null.
+    /// </summary>
+    public DateTime? EndDate { get; set; } = null;
+    
+    /// <summary>
+    /// Priority of the anime in the user's list. Default is null.
+    /// </summary>
+    public int? Priority { get; set; } = null;
+    
+    /// <summary>
+    /// The number of times the user has rewatched the anime. Default is null.
+    /// </summary>
+    public int? NumRewatched { get; set; } = null;
+    
+}

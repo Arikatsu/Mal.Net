@@ -11,7 +11,7 @@ public class AuthTests : TestsBase
     [Fact]
     public async Task AuthFlowTest()
     {
-        var authUrl = Client.GenerateAuthUrl(out var state, out var codeVerfier);
+        var authUrl = Client.GenerateAuthorizationUrl(out var state, out var codeVerfier);
         
         Assert.NotNull(authUrl);
         Assert.NotNull(state);
@@ -41,7 +41,7 @@ public class AuthTests : TestsBase
         
         Assert.NotEqual("error", code);
         
-        var user = await Client.AuthenticateUser(code, codeVerfier);
+        var user = await Client.AuthenticateUserAsync(code, codeVerfier);
         
         Assert.NotNull(user.AccessToken);
         Assert.NotNull(user.RefreshToken);
@@ -59,7 +59,7 @@ public class AuthTests : TestsBase
         var previousAccessToken = User.AccessToken;
         var previousRefreshToken = User.RefreshToken;
         
-        await User.RefreshAccessToken(true);
+        await User.RefreshAccessTokenAsync(true);
         
         Assert.NotEqual(previousAccessToken, User.AccessToken);
         Assert.NotEqual(previousRefreshToken, User.RefreshToken);

@@ -1,45 +1,29 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
-using Mal.Net.Schemas;
+using Mal.Net.Models;
 using Mal.Net.Exceptions;
 
 namespace Mal.Net.Utils;
 
 internal static class MalHttpClient
 {
-    private static readonly object Lock = new();
     private static readonly HttpClient HttpClient = new();
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
-    private static string? _clientId;
-
-    internal static void SetClientId(string clientId)
-    {
-        lock (Lock)
-        {
-            _clientId = clientId;
-        }
-    }
-
-    internal static async Task<string> GetAsync(string url, string? exceptionMessage = null, string? tokenType = null,
-        string? token = null, CancellationToken cancellationToken = default)
+    internal static async Task<string> GetAsync(string url, KeyValuePair<string, string> header, string? exceptionMessage = null, CancellationToken cancellationToken = default)
     {
         await Semaphore.WaitAsync(cancellationToken);
         
         HttpClient.DefaultRequestHeaders.Clear();
 
-        if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(tokenType))
+        if (!string.IsNullOrEmpty(header.Key))
         {
-            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(tokenType, token);
-        }
-        else if (!string.IsNullOrEmpty(_clientId))
-        {
-            HttpClient.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", _clientId);
+            HttpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
         }
         else
         {
             Semaphore.Release();
-            throw new MalHttpException(HttpStatusCode.BadRequest, "Client ID not set");
+            throw new MalHttpException(HttpStatusCode.BadRequest, "Required header is missing");
         }
 
         try
